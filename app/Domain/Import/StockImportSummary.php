@@ -15,5 +15,7 @@ final readonly class StockImportSummary
         public int $productCount,
         public int $categoryCount,
         public array $errors = [],
+        public ?string $startDate = null,
+        public ?string $endDate = null,
     ) {}
 }

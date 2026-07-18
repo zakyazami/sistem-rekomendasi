@@ -23,7 +23,13 @@ class StockHistoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'StockHistory';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Transaction';
+    protected static string|UnitEnum|null $navigationGroup = 'Transaksi';
+
+    protected static ?string $navigationLabel = 'Histori Stok';
+
+    protected static ?string $modelLabel = 'histori stok';
+
+    protected static ?string $pluralModelLabel = 'histori stok';
 
     public static function form(Schema $schema): Schema
     {

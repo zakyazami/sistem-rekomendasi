@@ -23,7 +23,13 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Product';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Master';
+    protected static string|UnitEnum|null $navigationGroup = 'Data Master';
+
+    protected static ?string $navigationLabel = 'Produk';
+
+    protected static ?string $modelLabel = 'produk';
+
+    protected static ?string $pluralModelLabel = 'produk';
 
     public static function form(Schema $schema): Schema
     {

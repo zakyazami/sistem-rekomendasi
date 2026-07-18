@@ -10,8 +10,9 @@ use App\Filament\Resources\StockHistories\Pages\ListStockHistories;
 use App\Filament\Resources\StockImports\StockImportResource;
 use App\Filament\Resources\StockRecommendations\StockRecommendationResource;
 use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Widgets\ArtifactStatusWidget;
 use App\Filament\Widgets\InventoryStatsWidget;
+use App\Filament\Widgets\ModelHealthOverviewWidget;
+use App\Filament\Widgets\RecommendationProcessStatusWidget;
 use App\Filament\Widgets\TopPriorityRecommendations;
 use App\Models\Category;
 use App\Models\Product;
@@ -50,7 +51,8 @@ it('registers the operational inventory and recommendation resources without the
         StockImportResource::class,
     )->and($panel->getWidgets())->toContain(
         InventoryStatsWidget::class,
-        ArtifactStatusWidget::class,
+        RecommendationProcessStatusWidget::class,
+        ModelHealthOverviewWidget::class,
         TopPriorityRecommendations::class,
     )->not->toContain(FilamentInfoWidget::class);
 });

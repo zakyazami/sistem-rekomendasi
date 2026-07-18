@@ -18,6 +18,10 @@ Tidak ada FastAPI, HTTP inference, Python CLI, atau proses Python pada runtime a
 - Recommendation run sinkron atau queue, retry, audit snapshot, dashboard, dan ekspor CSV.
 - Verifikasi 100 vector parity model serta 78 kasus parity rekomendasi.
 
+## Dokumentasi penggunaan
+
+Panduan langkah demi langkah untuk latihan operator, import data, pengaturan parameter, perhitungan rekomendasi, pembacaan hasil, ekspor, dan troubleshooting tersedia di [Panduan Latihan dan Penggunaan](docs/PANDUAN_LATIHAN_DAN_PENGGUNAAN.md).
+
 ## Prasyarat lokal
 
 - PHP 8.4.1 atau lebih baru beserta ekstensi Laravel/MySQL.
@@ -47,6 +51,19 @@ php artisan queue:work --queue=recommendations,default --tries=3 --timeout=300
 
 Isi `SEED_ADMIN_PASSWORD` sebelum seeding. Pada environment lokal/testing yang tidak mengisinya, password awal fallback adalah `password`; segera ganti setelah login. Pada production, seeder tidak membuat admin bila variabel tersebut kosong.
 
+Konfigurasi seeder:
+
+```dotenv
+SEED_ADMIN_NAME="Administrator Toko Barokah"
+SEED_ADMIN_EMAIL=admin@tokobarokah.test
+SEED_ADMIN_PASSWORD=
+SEED_FORCE_ADMIN_PASSWORD=false
+SEED_REFERENCE_DATA=false
+SEED_RUN_RECOMMENDATIONS=false
+```
+
+Password akun yang sudah ada tidak ditimpa kecuali `SEED_FORCE_ADMIN_PASSWORD=true`. Environment local/testing otomatis memuat dataset canonical. Pada production, dataset hanya dimuat bila `SEED_REFERENCE_DATA=true`. Rekomendasi awal berjalan sinkron dan idempotent hanya bila `SEED_RUN_RECOMMENDATIONS=true`.
+
 Konfigurasi model menggunakan:
 
 ```dotenv
@@ -75,6 +92,14 @@ php artisan stock:import project_naive_bayes/data/raw/dataset_toko_barokah.csv
 
 Dataset referensi yang diaudit memiliki 27.507 baris, 78 produk, 21 kategori, dan periode aktual 1 Agustus 2024 sampai 31 Agustus 2025. Periode ini berbeda dari narasi lama Oktober 2024–Oktober 2025 dan harus diselaraskan pada naskah skripsi, bukan diubah di aplikasi.
 
+Dataset canonical juga dapat di-seed secara eksplisit melalui service import yang sama:
+
+```powershell
+php artisan db:seed --class=TokoBarokahReferenceDatasetSeeder
+```
+
+Seeder memvalidasi header, jumlah baris/produk/kategori, rentang tanggal, kontinuitas stok, dan melakukan upsert per batch 1.000 baris. Menjalankannya kembali tidak menggandakan kategori, produk, atau histori.
+
 ## Menjalankan rekomendasi
 
 ```powershell
@@ -85,7 +110,7 @@ php artisan recommendations:run
 php artisan recommendations:run --sync
 ```
 
-Di Filament, menu **Proses Rekomendasi** menyediakan aksi queue, retry run gagal, detail hasil, dan ekspor CSV. Tombol proses dinonaktifkan bila artifact tidak valid. Dashboard menampilkan status checksum/schema artifact, versi, threshold, waktu training, periode, seluruh metrik test-set, data terbaru, data tidak cukup, dan prioritas pemesanan.
+Di Filament, menu **Proses Rekomendasi** menyediakan aksi queue, retry run gagal, detail hasil, dan ekspor CSV. Tombol proses dinonaktifkan bila artifact tidak valid atau data belum tersedia. Dashboard berorientasi operasional: empat ringkasan utama, status proses terakhir, kesehatan model terformat persen, metrik lanjutan yang dapat diperluas, serta 10 prioritas pemesanan dari run berhasil terbaru. Seluruh tanggal dan angka memakai format Indonesia; metrik tetap merupakan snapshot test-set artifact.
 
 ## Verifikasi model dan quality gate
 

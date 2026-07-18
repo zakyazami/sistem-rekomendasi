@@ -24,10 +24,15 @@ final readonly class RecommendationDashboardService
             ? null
             : CarbonImmutable::parse($latestDateValue)->toDateString();
         $latestRun = RecommendationRun::query()
+            ->latest('created_at')
+            ->latest('id')
+            ->first();
+        $latestCompletedRun = RecommendationRun::query()
             ->where('status', RecommendationRunStatus::Completed->value)
             ->latest('finished_at')
+            ->latest('id')
             ->first();
-        $recommendations = $latestRun?->recommendations() ?? null;
+        $recommendations = $latestCompletedRun?->recommendations() ?? null;
 
         try {
             $artifact = $this->artifactLoader->load();
@@ -56,7 +61,7 @@ final readonly class RecommendationDashboardService
             ];
         }
 
-        $topPriority = $latestRun?->recommendations()
+        $topPriority = $latestCompletedRun?->recommendations()
             ->with('product.category')
             ->where('final_recommendation', RecommendationLabel::NeedsOrder->value)
             ->orderByDesc('inventory_trigger')
@@ -71,6 +76,7 @@ final readonly class RecommendationDashboardService
             'data_is_stale' => $latestDate === null
                 || CarbonImmutable::parse($latestDate)->diffInDays(CarbonImmutable::now()) > 7,
             'latest_run' => $latestRun,
+            'latest_completed_run' => $latestCompletedRun,
             'needs_order' => $recommendations?->where('final_recommendation', RecommendationLabel::NeedsOrder->value)->count() ?? 0,
             'total_recommended_quantity' => (int) ($recommendations?->sum('recommended_quantity') ?? 0),
             'insufficient_data' => $recommendations?->where('item_status', RecommendationItemStatus::InsufficientData->value)->count() ?? 0,
