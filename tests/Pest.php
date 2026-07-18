@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domain\Recommendation\Data\ModelArtifact;
+use App\Services\MachineLearning\ModelArtifactLoader;
 use Tests\TestCase;
 
 /*
@@ -15,7 +16,6 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -44,7 +44,10 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function loadTestModelArtifact(): ModelArtifact
 {
-    // ..
+    return (new ModelArtifactLoader(
+        dirname(__DIR__).'/resources/ml/naive_bayes_rekomendasi_stok_laravel.json',
+        dirname(__DIR__).'/resources/ml/naive_bayes_rekomendasi_stok_laravel.json.sha256',
+    ))->load();
 }

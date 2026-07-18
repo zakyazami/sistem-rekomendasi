@@ -1,0 +1,11 @@
+.git
+.env
+node_modules
+vendor
+public/build
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+project_naive_bayes/data
+project_naive_bayes/model/*.pkl

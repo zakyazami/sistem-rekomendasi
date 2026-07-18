@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\InventorySetting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -10,21 +10,22 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
         ]);
+
+        InventorySetting::query()->updateOrCreate(
+            ['scope_key' => 'global'],
+            [
+                'product_id' => null,
+                'lead_time_days' => 3,
+                'review_period_days' => 7,
+                'service_level' => 0.95,
+                'prediction_horizon_days' => 1,
+            ],
+        );
     }
 }

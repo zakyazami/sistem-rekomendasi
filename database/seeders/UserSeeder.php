@@ -2,21 +2,30 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
+use App\Domain\Users\UserRole;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'zakyazami',
-            'email' => 'zakyazami0@gmail.com',
-            'password' => bcrypt('password'),
-        ]);
+        $password = env('SEED_ADMIN_PASSWORD');
+
+        if (blank($password) && app()->environment('production')) {
+            $this->command?->warn('Admin tidak dibuat: tetapkan SEED_ADMIN_PASSWORD di environment produksi.');
+
+            return;
+        }
+
+        User::query()->updateOrCreate(
+            ['email' => env('SEED_ADMIN_EMAIL', 'admin@tokobarokah.local')],
+            [
+                'name' => env('SEED_ADMIN_NAME', 'Administrator Toko Barokah'),
+                'password' => $password ?: 'password',
+                'role' => UserRole::Admin,
+                'email_verified_at' => now(),
+            ],
+        );
     }
 }

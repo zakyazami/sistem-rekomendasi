@@ -1,0 +1,64 @@
+services:
+  nginx:
+    build:
+      context: .
+      target: web
+    ports:
+      - "8080:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      target: app
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+      QUEUE_CONNECTION: database
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "artisan", "about", "--only=environment"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  queue:
+    build:
+      context: .
+      target: app
+    command: ["php", "artisan", "queue:work", "--queue=recommendations,default", "--tries=3", "--timeout=300"]
+    env_file: .env
+    environment:
+      DB_HOST: mysql
+      QUEUE_CONNECTION: database
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-sistem_rekomendasi}
+      MYSQL_USER: ${DB_USERNAME:-barokah}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-barokah}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+volumes:
+  mysql-data:

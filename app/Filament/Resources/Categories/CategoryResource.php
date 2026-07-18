@@ -23,7 +23,7 @@ class CategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Category';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Master';
+    protected static string|UnitEnum|null $navigationGroup = 'Master';
 
     public static function form(Schema $schema): Schema
     {
@@ -33,13 +33,6 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return CategoriesTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

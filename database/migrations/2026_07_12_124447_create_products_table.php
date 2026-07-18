@@ -23,11 +23,11 @@ return new class extends Migration
             $table->string('name');
 
             // Fast / Medium / Slow / Very Slow
-            $table->enum('moving_type',[
+            $table->enum('moving_type', [
                 'FAST',
                 'MEDIUM',
                 'SLOW',
-                'VERY_SLOW'
+                'VERY_SLOW',
             ]);
 
             // Stok minimum

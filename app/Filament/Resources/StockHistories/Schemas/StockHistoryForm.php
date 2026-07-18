@@ -14,13 +14,16 @@ class StockHistoryForm
         return $schema
             ->components([
                 DatePicker::make('date')
+                    ->label('Tanggal')
                     ->required(),
                 Select::make('product_id')
+                    ->label('Produk')
                     ->relationship('product', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 TextInput::make('initial_stock')
+                    ->label('Stok Awal')
                     ->required()
                     ->numeric()
                     ->live()
@@ -35,11 +38,13 @@ class StockHistoryForm
                         );
                     }),
                 TextInput::make('incoming_stock')
+                    ->label('Barang Masuk')
                     ->required()
                     ->numeric()
                     ->default(0)
                     ->live(),
                 TextInput::make('outgoing_stock')
+                    ->label('Barang Keluar')
                     ->required()
                     ->numeric()
                     ->default(0)
@@ -55,6 +60,7 @@ class StockHistoryForm
                         );
                     }),
                 TextInput::make('final_stock')
+                    ->label('Stok Akhir')
                     ->required()
                     ->dehydrated()
                     ->disabled()

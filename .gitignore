@@ -21,6 +21,10 @@
 /storage/*.key
 /storage/pail
 /vendor
+/project_naive_bayes/.ipynb_checkpoints/
+/project_naive_bayes/data/raw/*.csv
+/project_naive_bayes/data/processed/*.csv
+/project_naive_bayes/model/*.pkl
 _ide_helper.php
 Homestead.json
 Homestead.yaml

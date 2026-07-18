@@ -1,58 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Rekomendasi Pemesanan Stok Toko Barokah
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi skripsi berbasis Laravel 13 dan Filament 5 untuk mengelola stok harian serta menghasilkan rekomendasi pemesanan yang dapat diaudit. Arsitektur produksi adalah satu codebase:
 
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+Laravel / Filament → Feature Engineering PHP → Inference native PHP → Aturan Persediaan PHP → MySQL
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Tidak ada FastAPI, HTTP inference, Python CLI, atau proses Python pada runtime aplikasi. Training dan evaluasi tetap dilakukan di notebook/Google Colab. Laravel hanya membaca artifact JSON yang tervalidasi checksum; file `.pkl` merupakan arsip penelitian dan tidak dibaca aplikasi.
 
-## Contributing
+## Kemampuan utama
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- CRUD kategori, produk, pengguna, dan histori stok dengan policy berbasis peran.
+- Validasi kontinuitas serta perhitungan stok akhir di service server-side.
+- Preview dan import CSV privat, transaksional, idempotent, dan berbasis SKU deterministik.
+- Median imputation, Yeo-Johnson, standardisasi, dan Gaussian Naive Bayes dalam PHP 64-bit tanpa pembulatan intermediate.
+- Aturan hybrid yang memisahkan probabilitas model, klasifikasi model, trigger persediaan, rekomendasi final, dan jumlah pesan.
+- Recommendation run sinkron atau queue, retry, audit snapshot, dashboard, dan ekspor CSV.
+- Verifikasi 100 vector parity model serta 78 kasus parity rekomendasi.
 
-## Code of Conduct
+## Prasyarat lokal
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- PHP 8.4.1 atau lebih baru beserta ekstensi Laravel/MySQL.
+- Composer 2.
+- MySQL 8.
+- Node.js 24 atau versi LTS/kompatibel dengan Vite 8.
 
-## Security Vulnerabilities
+## Setup lokal
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+composer install
+Copy-Item .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm install
+npm run build
+php artisan ml:model-info
+php artisan ml:verify-parity
+php artisan serve
+```
 
-## License
+Pada terminal terpisah jalankan queue worker:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+php artisan queue:work --queue=recommendations,default --tries=3 --timeout=300
+```
+
+Isi `SEED_ADMIN_PASSWORD` sebelum seeding. Pada environment lokal/testing yang tidak mengisinya, password awal fallback adalah `password`; segera ganti setelah login. Pada production, seeder tidak membuat admin bila variabel tersebut kosong.
+
+Konfigurasi model menggunakan:
+
+```dotenv
+# Opsional; kosongkan agar Laravel memakai resources/ml secara otomatis.
+# ML_MODEL_ARTIFACT_PATH=/path/absolut/model.json
+# ML_MODEL_CHECKSUM_PATH=/path/absolut/model.json.sha256
+ML_PARITY_TOLERANCE=1.0e-8
+```
+
+Artifact berada di `resources/ml/`, bukan `public/`, dan penggantiannya harus melalui release/commit terkontrol.
+
+## Import dataset
+
+Header CSV wajib:
+
+```text
+tanggal,nama_barang,kategori,stok_awal,barang_masuk,barang_keluar,stok_akhir,label
+```
+
+Kolom `label` diterima hanya untuk kompatibilitas dataset penelitian dan tidak digunakan sebagai fitur inference produksi. Lakukan pratinjau sebelum commit:
+
+```powershell
+php artisan stock:import project_naive_bayes/data/raw/dataset_toko_barokah.csv --dry-run
+php artisan stock:import project_naive_bayes/data/raw/dataset_toko_barokah.csv
+```
+
+Dataset referensi yang diaudit memiliki 27.507 baris, 78 produk, 21 kategori, dan periode aktual 1 Agustus 2024 sampai 31 Agustus 2025. Periode ini berbeda dari narasi lama Oktober 2024–Oktober 2025 dan harus diselaraskan pada naskah skripsi, bukan diubah di aplikasi.
+
+## Menjalankan rekomendasi
+
+```powershell
+# Masuk antrean
+php artisan recommendations:run
+
+# Proses langsung untuk verifikasi/operasional terkontrol
+php artisan recommendations:run --sync
+```
+
+Di Filament, menu **Proses Rekomendasi** menyediakan aksi queue, retry run gagal, detail hasil, dan ekspor CSV. Tombol proses dinonaktifkan bila artifact tidak valid. Dashboard menampilkan status checksum/schema artifact, versi, threshold, waktu training, periode, seluruh metrik test-set, data terbaru, data tidak cukup, dan prioritas pemesanan.
+
+## Verifikasi model dan quality gate
+
+```powershell
+php artisan optimize:clear
+php artisan migrate:fresh --seed
+php artisan test
+vendor/bin/pint --test
+php artisan ml:model-info
+php artisan ml:verify-parity
+npm install
+npm run build
+```
+
+`ml:model-info` gagal dengan exit code non-zero saat checksum/schema/parameter artifact tidak valid. `ml:verify-parity` memeriksa fixture model dan rekomendasi secara lokal tanpa jaringan atau runtime Python.
+
+## Docker Compose
+
+Salin `.env.example` ke `.env`, isi `APP_KEY`, kredensial MySQL, dan password admin, lalu jalankan:
+
+```powershell
+docker compose build
+docker compose up -d
+docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan ml:verify-parity
+```
+
+Aplikasi tersedia pada `http://localhost:8080`. Compose hanya berisi nginx, Laravel PHP-FPM, queue worker dari image/source Laravel yang sama, dan MySQL. Node hanya dipakai pada build stage asset; tidak ada container atau package Python.
+
+## Struktur model penelitian
+
+- `project_naive_bayes/notebook/`: training dan evaluasi penelitian.
+- `resources/ml/`: artifact JSON deployment dan manifest SHA-256.
+- `tests/Fixtures/ML/`: fixture parity yang tidak boleh diubah untuk menutupi selisih implementasi.
+- `project_naive_bayes/model/*.pkl`: arsip lokal yang diabaikan Git dan bukan dependency Laravel.
+
+Metrik pada dashboard adalah snapshot test set dari artifact, bukan metrik yang dihitung ulang menggunakan data produksi. Rekomendasi final juga tidak diklaim sebagai keluaran murni Naive Bayes karena keputusan menggabungkan klasifikasi model dan trigger persediaan.

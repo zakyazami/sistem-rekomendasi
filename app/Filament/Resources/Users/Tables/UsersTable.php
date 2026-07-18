@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use App\Models\User;
+use App\Services\Users\UserManagementService;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Validation\ValidationException;
 
 class UsersTable
 {
@@ -32,17 +34,22 @@ class UsersTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                DeleteAction::make()
+                    ->using(function (DeleteAction $action, User $record): bool {
+                        try {
+                            app(UserManagementService::class)->delete($record, auth()->user());
+                        } catch (ValidationException $exception) {
+                            Notification::make()
+                                ->danger()
+                                ->title(collect($exception->errors())->flatten()->first())
+                                ->send();
+                            $action->halt();
+                        }
+
+                        return true;
+                    }),
             ]);
     }
 }

@@ -1,0 +1,2 @@
+accuracy,balanced_accuracy,precision_perlu_pesan,recall_perlu_pesan,f1_perlu_pesan,pr_auc,roc_auc,mae_jumlah_pesan_semua_data,mae_jumlah_pesan_target_positif,threshold,best_var_smoothing
+0.9658925979680697,0.8453664466434146,0.5852534562211982,0.7134831460674157,0.6430379746835443,0.6223228194501212,0.9806878472182775,0.840106434446057,7.337078651685394,0.99,0.001

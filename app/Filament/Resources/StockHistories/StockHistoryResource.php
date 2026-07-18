@@ -22,8 +22,8 @@ class StockHistoryResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'StockHistory';
-    
-    protected static string | UnitEnum | null $navigationGroup = 'Transaction';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Transaction';
 
     public static function form(Schema $schema): Schema
     {
@@ -35,13 +35,6 @@ class StockHistoryResource extends Resource
         return StockHistoriesTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
@@ -49,29 +42,5 @@ class StockHistoryResource extends Resource
             'create' => CreateStockHistory::route('/create'),
             'edit' => EditStockHistory::route('/{record}/edit'),
         ];
-    }
-
-    public static function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['final_stock'] =
-            $data['initial_stock']
-            +
-            $data['incoming_stock']
-            -
-            $data['outgoing_stock'];
-
-        return $data;
-    }
-
-    public static function mutateFormDataBeforeSave(array $data): array
-    {
-        $data['final_stock'] =
-            $data['initial_stock']
-            +
-            $data['incoming_stock']
-            -
-            $data['outgoing_stock'];
-
-        return $data;
     }
 }

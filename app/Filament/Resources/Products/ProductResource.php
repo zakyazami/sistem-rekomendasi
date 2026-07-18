@@ -23,7 +23,7 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'Product';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Master';
+    protected static string|UnitEnum|null $navigationGroup = 'Master';
 
     public static function form(Schema $schema): Schema
     {
@@ -33,13 +33,6 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return ProductsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

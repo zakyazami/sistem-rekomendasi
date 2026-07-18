@@ -1,0 +1,211 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_type": "gaussian_naive_bayes_php_inference",
+  "model_name": "naive_bayes_rekomendasi_stok_toko_barokah",
+  "model_version": "1.0.0",
+  "deployment": {
+    "inference_runtime": "PHP 8.3+ / Laravel",
+    "python_required_in_production": false,
+    "pickle_required_in_production": false,
+    "notes": "Training dilakukan di notebook. Laravel hanya membaca artifact JSON ini."
+  },
+  "target": {
+    "column": "target_perlu_pesan_berikutnya",
+    "classes": [
+      0,
+      1
+    ],
+    "labels": {
+      "0": "Tidak",
+      "1": "Perlu Pesan"
+    },
+    "positive_class": 1
+  },
+  "feature_order": [
+    "stok_akhir",
+    "barang_keluar",
+    "rata_penjualan_7",
+    "std_penjualan_7",
+    "rata_penjualan_30",
+    "std_penjualan_30",
+    "cakupan_stok_hari",
+    "hari_dalam_minggu",
+    "horizon_hari_target"
+  ],
+  "preprocessing": {
+    "imputer": {
+      "strategy": "median",
+      "statistics": [
+        33.0,
+        2.0,
+        2.285714,
+        1.124858,
+        2.333333,
+        1.320353,
+        14.536082,
+        3.0,
+        1.0
+      ]
+    },
+    "power_transformer": {
+      "method": "yeo-johnson",
+      "standardize": true,
+      "lambdas": [
+        0.11532625686192952,
+        0.387897350013552,
+        1.2787809021880012,
+        0.07735675471805932,
+        2.06898913459956,
+        0.21991024515281649,
+        -0.42530626581295367,
+        0.7155125420146474,
+        -23.697093390312002
+      ],
+      "scaler_mean": [
+        4.350633109895533,
+        1.4082752732248272,
+        2.9784006303599067,
+        0.8132199924198201,
+        5.831839212770689,
+        0.930384379433141,
+        1.6035779701852062,
+        2.2658673682876613,
+        0.0421992653664458
+      ],
+      "scaler_scale": [
+        0.736927914877553,
+        0.8775213398183105,
+        1.2937535702621525,
+        0.34902766928812595,
+        2.4951907175942427,
+        0.3819535382730663,
+        0.15261045757908667,
+        1.4002597943445145,
+        8.443011818743667e-10
+      ],
+      "lambda_zero_tolerance": 1e-12,
+      "lambda_two_tolerance": 1e-12
+    }
+  },
+  "classifier": {
+    "type": "GaussianNB",
+    "classes": [
+      0,
+      1
+    ],
+    "class_count": [
+      21755.0,
+      994.0
+    ],
+    "class_prior": [
+      0.9563057716822717,
+      0.043694228317728255
+    ],
+    "theta": [
+      [
+        0.06472887665888734,
+        -0.0014016775986028349,
+        -0.01899475823439772,
+        -0.06224569703796975,
+        -0.022114702011975858,
+        -0.06802384403396775,
+        0.08975491708617085,
+        -0.0013235367350977428,
+        -0.004214887478875958
+      ],
+      [
+        -1.4166767723482094,
+        0.03067756152675183,
+        0.4157253172930947,
+        1.3623291137434526,
+        0.48400939866249565,
+        1.488791475813857,
+        -1.9644046491042917,
+        0.028967345746517964,
+        0.09224848724405886
+      ]
+    ],
+    "variance": [
+      [
+        0.9449163412672665,
+        0.9469446680340993,
+        0.9730950330734395,
+        0.945449567675732,
+        1.006403578077918,
+        0.9385400505452711,
+        0.8465842850490616,
+        1.0013710193124463,
+        0.9879879859110884
+      ],
+      [
+        0.12979181106462895,
+        2.1830880671669006,
+        1.4310128360175278,
+        0.2760546823120853,
+        0.6377667507340699,
+        0.05024493264262281,
+        0.3453908254952456,
+        0.9920023069124115,
+        1.2768864770843416
+      ]
+    ],
+    "epsilon": 0.0010000000000000007,
+    "var_smoothing": 0.001,
+    "probability_calculation": "stable_softmax_of_joint_log_likelihood"
+  },
+  "decision": {
+    "probability_threshold": 0.99,
+    "comparison_operator": ">=",
+    "model_positive_label": "Perlu Pesan",
+    "policy": "hybrid_model_or_inventory_trigger",
+    "inventory_trigger": "projected_inventory <= reorder_point",
+    "projected_inventory": "max(0, inventory_position - rata_penjualan_30 * horizon_hari_target)",
+    "order_quantity": "max(0, ceil(target_stock - projected_inventory)) jika rekomendasi akhir positif"
+  },
+  "inventory_defaults": {
+    "lead_time_hari": 3,
+    "review_period_hari": 7,
+    "service_level": 0.95,
+    "service_level_z": 1.6448536269514722,
+    "prediction_horizon_days": 1,
+    "barang_dalam_pemesanan": 0,
+    "standard_deviation_ddof": 0,
+    "minimum_history_rows": 8,
+    "weekday_mapping": {
+      "Monday": 0,
+      "Tuesday": 1,
+      "Wednesday": 2,
+      "Thursday": 3,
+      "Friday": 4,
+      "Saturday": 5,
+      "Sunday": 6
+    }
+  },
+  "metrics_test": {
+    "accuracy": 0.9658925979680697,
+    "balanced_accuracy": 0.8453664466434146,
+    "precision_perlu_pesan": 0.5852534562211982,
+    "recall_perlu_pesan": 0.7134831460674157,
+    "f1_perlu_pesan": 0.6430379746835443,
+    "pr_auc": 0.6223228194501212,
+    "roc_auc": 0.9806878472182775,
+    "mae_jumlah_pesan_semua_data": 0.840106434446057,
+    "mae_jumlah_pesan_target_positif": 7.337078651685394,
+    "threshold": 0.99,
+    "best_var_smoothing": 0.001
+  },
+  "training_metadata": {
+    "trained_at": "2026-07-18T16:15:41.508161+00:00",
+    "python_version": "3.13.5",
+    "scikit_learn_version": "1.8.0",
+    "train_validation_rows": 22749,
+    "test_rows": 4134,
+    "training_target_start": "2024-08-09T00:00:00",
+    "training_target_end": "2025-07-03T00:00:00",
+    "test_target_start": "2025-07-04T00:00:00",
+    "test_target_end": "2025-08-31T00:00:00",
+    "modeling_dataset_sha256": "87c21d69223e019cab1800c243097d70195b6b4f568fac1be98a4677b9c8e5e2",
+    "raw_dataset_sha256": "a0906683b6596519a93743078fd4555321a3533bf53408c83ebd48962ce9aaf3"
+  },
+  "artifact_sha256": "2c4675ac36e98340e36777d2530298880cd92f11c86df0ecb8c0f11c142ce960"
+}

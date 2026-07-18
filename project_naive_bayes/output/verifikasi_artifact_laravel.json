@@ -1,0 +1,6 @@
+{
+  "max_abs_error_transformation": 8.271161533457416e-15,
+  "max_abs_error_joint_log_likelihood": 7.105427357601002e-14,
+  "max_abs_error_probability": 1.1046719095020308e-14,
+  "prediction_mismatch_count": 0
+}

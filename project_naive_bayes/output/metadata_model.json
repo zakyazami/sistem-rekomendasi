@@ -1,0 +1,35 @@
+{
+  "model": "GaussianNB + MedianImputer + YeoJohnson PowerTransformer",
+  "target": "target_perlu_pesan_berikutnya",
+  "features": [
+    "stok_akhir",
+    "barang_keluar",
+    "rata_penjualan_7",
+    "std_penjualan_7",
+    "rata_penjualan_30",
+    "std_penjualan_30",
+    "cakupan_stok_hari",
+    "hari_dalam_minggu",
+    "horizon_hari_target"
+  ],
+  "threshold": 0.99,
+  "metrics": {
+    "accuracy": 0.9658925979680697,
+    "balanced_accuracy": 0.8453664466434146,
+    "precision_perlu_pesan": 0.5852534562211982,
+    "recall_perlu_pesan": 0.7134831460674157,
+    "f1_perlu_pesan": 0.6430379746835443,
+    "pr_auc": 0.6223228194501212,
+    "roc_auc": 0.9806878472182775,
+    "mae_jumlah_pesan_semua_data": 0.840106434446057,
+    "mae_jumlah_pesan_target_positif": 7.337078651685394,
+    "threshold": 0.99,
+    "best_var_smoothing": 0.001
+  },
+  "deployment_artifact": "/mnt/data/work_nb/project_naive_bayes/model/naive_bayes_rekomendasi_stok_laravel.json",
+  "artifact_payload_sha256": "2c4675ac36e98340e36777d2530298880cd92f11c86df0ecb8c0f11c142ce960",
+  "artifact_file_sha256": "520f43985da4949e148a2c919a628d4c101dadac1f6376f2502530e7469823cc",
+  "python_pickle_is_deployment_dependency": false,
+  "modeling_data": "/mnt/data/work_nb/project_naive_bayes/data/processed/dataset_toko_barokah_modeling.csv",
+  "raw_data": "/mnt/data/work_nb/project_naive_bayes/data/raw/dataset_toko_barokah.csv"
+}
